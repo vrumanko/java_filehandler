@@ -1,4 +1,4 @@
-package server.src;
+package server;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -193,9 +193,13 @@ public class FileHandlerServer {
     }
 
     private File decryptFile(File encryptedFile, String encryptionKey) throws Exception {
-        File decryptedFile = File.createTempFile("decrypted_", ".gz");
+        File decryptedFile = File.createTempFile("decrypted_", ".tmp");
         
-        SecretKeySpec secretKey = new SecretKeySpec(encryptionKey.getBytes(), "AES");
+        // Generate a 32-byte (256-bit) key using SHA-256
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] keyBytes = digest.digest(encryptionKey.getBytes());
+        
+        SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.DECRYPT_MODE, secretKey);
         

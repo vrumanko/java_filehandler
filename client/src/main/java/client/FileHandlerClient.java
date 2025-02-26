@@ -1,4 +1,4 @@
-package client.src;
+package client;
 
 import java.io.*;
 import java.net.Socket;
@@ -142,9 +142,13 @@ public class FileHandlerClient {
     }
 
     private File encryptFile(File inputFile) throws Exception {
-        File encryptedFile = File.createTempFile("encrypted_", ".enc");
+        File encryptedFile = File.createTempFile("encrypted_", ".tmp");
         
-        SecretKeySpec secretKey = new SecretKeySpec(encryptionKey.getBytes(), "AES");
+        // Generate a 32-byte (256-bit) key using SHA-256
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] keyBytes = digest.digest(encryptionKey.getBytes());
+        
+        SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
         
