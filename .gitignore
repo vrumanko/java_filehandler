@@ -1,0 +1,41 @@
+# JAR Dependencies
+client/lib/log4j-1.2.17.jar
+client/lib/commons-io-2.11.0.jar
+server/lib/log4j-1.2.17.jar
+server/lib/commons-io-2.11.0.jar
+
+# Generated JAR files
+client/lib/filehandler-client.jar
+server/lib/filehandler-server.jar
+
+# Log files
+client/logs/
+server/logs/
+*.log
+
+# Compiled class files
+*.class
+
+# Compiled binary folders
+client/bin/
+server/bin/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/ 
