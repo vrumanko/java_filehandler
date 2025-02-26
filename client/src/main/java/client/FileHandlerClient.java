@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.file.*;
 import java.security.MessageDigest;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -12,10 +14,25 @@ import java.util.zip.GZIPOutputStream;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.apache.commons.io.FileUtils;
 
 public class FileHandlerClient {
+    // Configure logging first
+    static {
+        String logConfigPath = "../client/config/log4j.properties";
+        File logConfigFile = new File(logConfigPath);
+        if (logConfigFile.exists()) {
+            PropertyConfigurator.configure(logConfigPath);
+            System.out.println("Loaded log4j configuration from: " + logConfigFile.getAbsolutePath());
+        } else {
+            System.out.println("Warning: Log4j configuration file not found at: " + logConfigFile.getAbsolutePath());
+        }
+    }
+    
+    // Initialize logger after configuration
     private static final Logger logger = Logger.getLogger(FileHandlerClient.class);
+    
     private Properties config;
     private List<String> sourceDirs;
     private String serverIp;
@@ -56,7 +73,7 @@ public class FileHandlerClient {
 
     private void pollDirectories() {
         logger.debug("Polling directories for files...");
-        System.out.println("Scanning directories for files to send...");
+        System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + " - Scanning directories for files to send...");
         
         for (String dirPath : sourceDirs) {
             try {
@@ -186,15 +203,14 @@ public class FileHandlerClient {
             dos.writeLong(file.length());
             
             // Send file data
-            FileInputStream fis = new FileInputStream(file);
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            
-            while ((bytesRead = fis.read(buffer)) != -1) {
-                dos.write(buffer, 0, bytesRead);
+            try (FileInputStream fis = new FileInputStream(file)) {
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                
+                while ((bytesRead = fis.read(buffer)) != -1) {
+                    dos.write(buffer, 0, bytesRead);
+                }
             }
-            
-            fis.close();
             
             // Check response
             try (DataInputStream dis = new DataInputStream(socket.getInputStream())) {
@@ -251,6 +267,8 @@ public class FileHandlerClient {
             System.out.println("Usage: java FileHandlerClient <config-file-path>");
             System.exit(1);
         }
+        
+        logger.info("Starting FileHandlerClient application");
         
         String configPath = args[0];
         FileHandlerClient client = new FileHandlerClient(configPath);

@@ -91,7 +91,7 @@ client.label=client1
 source.directories=/tmp/filehandler/source1,/tmp/filehandler/source2
 server.host=localhost
 server.port=9000
-encryption.key=abcdefghijklmnop
+encryption.key=ThisIsASecretKey1234567890123456
 EOF
 fi
 
@@ -133,7 +133,7 @@ if [ ! -f "server/config/client_keys.properties" ]; then
   cat > server/config/client_keys.properties << EOF
 # Client encryption keys
 # Format: client_label=encryption_key
-client1=abcdefghijklmnop
+client1=ThisIsASecretKey1234567890123456
 EOF
 fi
 
@@ -205,4 +205,9 @@ echo "Test scenario:"
 echo "- The setup has created a test file at /tmp/filehandler/source1/test.txt"
 echo "- When both client and server are running, the file will be transferred"
 echo "- After successful transfer, it will appear in /tmp/filehandler/received/"
-echo "----------------------------------------" 
+echo "----------------------------------------"
+
+# Remove redundant log4j.properties in src/main/resources
+echo "Cleaning up redundant log4j configuration files..."
+rm -f client/src/main/resources/log4j.properties
+rm -f server/src/main/resources/log4j.properties 
