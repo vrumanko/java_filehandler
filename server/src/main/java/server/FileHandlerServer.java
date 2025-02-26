@@ -14,7 +14,7 @@ import java.util.zip.GZIPInputStream;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.log4j.Logger;
-
+import org.apache.log4j.BasicConfigurator;
 public class FileHandlerServer {
     private static final Logger logger = Logger.getLogger(FileHandlerServer.class);
     private Properties config;
@@ -46,9 +46,7 @@ public class FileHandlerServer {
             if (clientPathsConfig != null) {
                 clientPaths.load(new FileInputStream(clientPathsConfig));
             }
-            
-            logger.info("FileHandlerServer initialized on port: " + port);
-            printEnvironmentInfo();
+           
         } catch (IOException e) {
             logger.error("Error loading configuration: " + e.getMessage(), e);
             System.exit(1);
@@ -57,14 +55,12 @@ public class FileHandlerServer {
 
     public void start() {
         logger.info("Starting file handler server on port: " + port);
-        System.out.println("File Handler Server starting on port: " + port);
         
         running = true;
         executor = Executors.newFixedThreadPool(10);
         
         try {
             serverSocket = new ServerSocket(port);
-            System.out.println("Server is listening on port " + port);
             logger.info("Server started and listening on port " + port);
             
             while (running) {
@@ -74,7 +70,6 @@ public class FileHandlerServer {
         } catch (IOException e) {
             if (running) {
                 logger.error("Error starting server: " + e.getMessage(), e);
-                System.out.println("Error starting server: " + e.getMessage());
             }
         }
     }
@@ -82,7 +77,7 @@ public class FileHandlerServer {
     private void handleClient(Socket clientSocket) {
         try {
             logger.info("Client connected: " + clientSocket.getInetAddress().getHostAddress());
-            System.out.println("Client connected: " + clientSocket.getInetAddress().getHostAddress());
+            
             
             DataInputStream dis = new DataInputStream(clientSocket.getInputStream());
             DataOutputStream dos = new DataOutputStream(clientSocket.getOutputStream());
@@ -103,7 +98,7 @@ public class FileHandlerServer {
             long fileSize = dis.readLong();
             logger.info("File size: " + fileSize + " bytes");
             
-            System.out.println("Receiving file: " + originalFileName + " from client: " + clientLabel);
+            logger.info("Receiving file: " + originalFileName + " from client: " + clientLabel);
             
             // Process the file
             long startTime = System.currentTimeMillis();
@@ -170,7 +165,6 @@ public class FileHandlerServer {
                 originalFileName, clientLabel, fileSize, fileHash, duration
             );
             logger.info(logMessage);
-            System.out.println(logMessage);
             
             // Send success response
             dos.writeUTF("SUCCESS");
@@ -182,7 +176,6 @@ public class FileHandlerServer {
             
         } catch (Exception e) {
             logger.error("Error handling client: " + e.getMessage(), e);
-            System.out.println("Error handling client: " + e.getMessage());
         } finally {
             try {
                 clientSocket.close();
@@ -213,7 +206,7 @@ public class FileHandlerServer {
             fos.write(outputBytes);
         }
         
-        logger.debug("File decrypted successfully");
+        logger.info("File decrypted successfully");
         return decryptedFile;
     }
 
@@ -231,7 +224,7 @@ public class FileHandlerServer {
             }
         }
         
-        logger.debug("File uncompressed successfully");
+        logger.info("File uncompressed successfully");
         return uncompressedFile;
     }
 
@@ -248,21 +241,6 @@ public class FileHandlerServer {
         }
         
         return hexString.toString();
-    }
-
-    private void printEnvironmentInfo() {
-        logger.info("Environment Information:");
-        logger.info("Java Version: " + System.getProperty("java.version"));
-        logger.info("Java Home: " + System.getProperty("java.home"));
-        logger.info("Working Directory: " + System.getProperty("user.dir"));
-        logger.info("Server Port: " + port);
-        
-        System.out.println("\n--- Environment Information ---");
-        System.out.println("Java Version: " + System.getProperty("java.version"));
-        System.out.println("Java Home: " + System.getProperty("java.home"));
-        System.out.println("Working Directory: " + System.getProperty("user.dir"));
-        System.out.println("Server Port: " + port);
-        System.out.println("-----------------------------\n");
     }
 
     public void stop() {
@@ -291,6 +269,8 @@ public class FileHandlerServer {
         
         String configPath = args[0];
         FileHandlerServer server = new FileHandlerServer(configPath);
+        FileHandlerClient client = new FileHandlerClient(configPath);
+        String log4jConfPath = "../config/log4j.properties";
         server.start();
         
         // Add shutdown hook

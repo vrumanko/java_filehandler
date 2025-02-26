@@ -13,24 +13,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.apache.commons.io.FileUtils;
 
 public class FileHandlerClient {
-    // Configure logging first
-    static {
-        String logConfigPath = "../client/config/log4j.properties";
-        File logConfigFile = new File(logConfigPath);
-        if (logConfigFile.exists()) {
-            PropertyConfigurator.configure(logConfigPath);
-            System.out.println("Loaded log4j configuration from: " + logConfigFile.getAbsolutePath());
-        } else {
-            System.out.println("Warning: Log4j configuration file not found at: " + logConfigFile.getAbsolutePath());
-        }
-    }
-    
-    // Initialize logger after configuration
+    // Initialize logger
     private static final Logger logger = Logger.getLogger(FileHandlerClient.class);
     
     private Properties config;
@@ -40,6 +28,7 @@ public class FileHandlerClient {
     private String clientLabel;
     private String encryptionKey;
     private ScheduledExecutorService scheduler;
+    private int pollingIntervalSeconds;
 
     public FileHandlerClient(String configPath) {
         try {
@@ -49,43 +38,54 @@ public class FileHandlerClient {
             
             // Parse configuration
             sourceDirs = Arrays.asList(config.getProperty("source.directories").split(","));
-            serverIp = config.getProperty("server.ip");
+            serverIp = config.getProperty("server.host");
             serverPort = Integer.parseInt(config.getProperty("server.port"));
             clientLabel = config.getProperty("client.label");
             encryptionKey = config.getProperty("encryption.key");
             
+            // Get polling interval with default of 30 seconds if not specified
+            String pollingIntervalStr = config.getProperty("polling.interval.seconds");
+            pollingIntervalSeconds = (pollingIntervalStr != null) ? 
+                                     Integer.parseInt(pollingIntervalStr) : 30;
+            
             logger.info("FileHandlerClient initialized with label: " + clientLabel);
+            System.out.println("FileHandlerClient initialized with label: " + clientLabel);
             printEnvironmentInfo();
         } catch (IOException e) {
             logger.error("Error loading configuration: " + e.getMessage(), e);
+            System.err.println("Error loading configuration: " + e.getMessage());
             System.exit(1);
         }
     }
 
     public void start() {
         logger.info("Starting file handler client with label: " + clientLabel);
-        System.out.println("File Handler Client started. Label: " + clientLabel);
-        
-        // Schedule file polling
+       
+        // Schedule file polling using the configured interval
         scheduler = Executors.newScheduledThreadPool(1);
-        scheduler.scheduleAtFixedRate(this::pollDirectories, 0, 30, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(this::pollDirectories, 0, pollingIntervalSeconds, TimeUnit.SECONDS);
+        
+        logger.info("Directory polling scheduled every " + pollingIntervalSeconds + " seconds");
+       
     }
 
     private void pollDirectories() {
-        logger.debug("Polling directories for files...");
-        System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + " - Scanning directories for files to send...");
-        
+        String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        logger.info(timeStamp + " - Scanning directories for files to send...");
+       
         for (String dirPath : sourceDirs) {
             try {
                 Path dir = Paths.get(dirPath);
                 if (!Files.exists(dir)) {
                     logger.warn("Directory does not exist: " + dirPath);
+                   
                     continue;
                 }
                 
                 Files.list(dir).filter(Files::isRegularFile).forEach(this::processFile);
             } catch (IOException e) {
                 logger.error("Error polling directory " + dirPath + ": " + e.getMessage(), e);
+               
             }
         }
     }
@@ -93,12 +93,11 @@ public class FileHandlerClient {
     private void processFile(Path filePath) {
         String fileName = filePath.getFileName().toString();
         logger.info("Processing file: " + fileName);
-        System.out.println("Processing file: " + fileName);
+       
         
         try {
             // Calculate file hash
             String fileHash = calculateFileHash(filePath);
-            logger.info("File hash: " + fileHash);
             
             // Compress the file
             File compressedFile = compressFile(filePath.toFile());
@@ -116,12 +115,12 @@ public class FileHandlerClient {
             if (sent) {
                 // Delete original file after successful transfer
                 Files.delete(filePath);
-                logger.info("File deleted after successful transfer: " + fileName);
-                System.out.println("File processed and sent successfully: " + fileName);
+                logger.info("File processed and sent successfully: " + fileName);
+              
             }
         } catch (Exception e) {
             logger.error("Error processing file " + fileName + ": " + e.getMessage(), e);
-            System.out.println("Error processing file: " + fileName);
+           
         }
     }
 
@@ -154,7 +153,6 @@ public class FileHandlerClient {
             }
         }
         
-        logger.debug("File compressed: " + inputFile.getName());
         return compressedFile;
     }
 
@@ -179,7 +177,6 @@ public class FileHandlerClient {
             fos.write(outputBytes);
         }
         
-        logger.debug("File encrypted: " + inputFile.getName());
         return encryptedFile;
     }
 
@@ -219,23 +216,21 @@ public class FileHandlerClient {
                 long endTime = System.currentTimeMillis();
                 double duration = (endTime - startTime) / 1000.0;
                 
-                logger.info("File transfer completed: " + originalFileName + 
-                           ", Duration: " + duration + " seconds, Response: " + response);
-                
-                System.out.println("File sent: " + originalFileName + 
-                                   " (Duration: " + duration + " seconds)");
+                String message = "File sent: " + originalFileName + " (Duration: " + duration + " seconds)";
+                logger.info(message);
+               
                 
                 return "SUCCESS".equals(response);
             }
         } catch (IOException e) {
             logger.error("Error sending file to server: " + e.getMessage(), e);
-            System.out.println("Error sending file to server: " + e.getMessage());
+           
             return false;
         }
     }
 
     private void printEnvironmentInfo() {
-        logger.info("Environment Information:");
+        logger.info("--- Environment Information ---");
         logger.info("Java Version: " + System.getProperty("java.version"));
         logger.info("Java Home: " + System.getProperty("java.home"));
         logger.info("Working Directory: " + System.getProperty("user.dir"));
@@ -243,16 +238,10 @@ public class FileHandlerClient {
         logger.info("Server IP: " + serverIp);
         logger.info("Server Port: " + serverPort);
         logger.info("Source Directories: " + String.join(", ", sourceDirs));
+        logger.info("Polling Interval: " + pollingIntervalSeconds + " seconds");
+        logger.info("-----------------------------");
         
-        System.out.println("\n--- Environment Information ---");
-        System.out.println("Java Version: " + System.getProperty("java.version"));
-        System.out.println("Java Home: " + System.getProperty("java.home"));
-        System.out.println("Working Directory: " + System.getProperty("user.dir"));
-        System.out.println("Client Label: " + clientLabel);
-        System.out.println("Server IP: " + serverIp);
-        System.out.println("Server Port: " + serverPort);
-        System.out.println("Source Directories: " + String.join(", ", sourceDirs));
-        System.out.println("-----------------------------\n");
+       
     }
 
     public void stop() {
@@ -260,18 +249,20 @@ public class FileHandlerClient {
             scheduler.shutdown();
         }
         logger.info("FileHandlerClient stopped");
+       
     }
 
     public static void main(String[] args) {
         if (args.length < 1) {
+            logger.error("Missing configuration file path");
             System.out.println("Usage: java FileHandlerClient <config-file-path>");
             System.exit(1);
         }
         
-        logger.info("Starting FileHandlerClient application");
-        
         String configPath = args[0];
         FileHandlerClient client = new FileHandlerClient(configPath);
+        String log4jConfPath = "../config/log4j.properties";
+        PropertyConfigurator.configure(log4jConfPath);
         client.start();
         
         // Add shutdown hook
