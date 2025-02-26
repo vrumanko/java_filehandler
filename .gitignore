@@ -12,6 +12,7 @@ server/lib/filehandler-server.jar
 client/logs/
 server/logs/
 *.log
+*.log.*
 
 # Compiled class files
 *.class

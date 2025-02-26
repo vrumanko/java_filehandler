@@ -19,12 +19,18 @@ A client-server application for securely transferring files. The client watches 
 java_filehandler/
 ├── client/
 │   ├── config/         - Configuration files
+│   │   ├── client.properties - Client configuration
+│   │   └── log4j.properties - Logging configuration
 │   ├── lib/            - JAR dependencies
 │   ├── logs/           - Log files
 │   ├── script/         - Compilation and startup scripts
 │   └── src/            - Source code
 ├── server/
 │   ├── config/         - Configuration files
+│   │   ├── server.properties - Server configuration
+│   │   ├── client_keys.properties - Client encryption keys
+│   │   ├── client_paths.properties - Client storage paths
+│   │   └── log4j.properties - Logging configuration
 │   ├── lib/            - JAR dependencies
 │   ├── logs/           - Log files
 │   ├── script/         - Compilation and startup scripts
@@ -94,6 +100,7 @@ This project depends on specific JAR files that need to be downloaded and placed
      - Source directories to monitor
      - Server IP and port
      - Encryption key
+   - Edit `client/config/log4j.properties` if you need to customize logging behavior
 
 3. Configure server:
    - Edit `server/config/server.properties` to set:
@@ -101,6 +108,13 @@ This project depends on specific JAR files that need to be downloaded and placed
      - Client key and path configuration files
    - Edit `server/config/client_keys.properties` to define encryption keys for each client
    - Edit `server/config/client_paths.properties` to define storage paths for each client
+   - Edit `server/config/log4j.properties` if you need to customize logging behavior
+
+4. Create log directories:
+   ```
+   mkdir -p client/logs
+   mkdir -p server/logs
+   ```
 
 ## Compilation
 
@@ -132,6 +146,17 @@ This project depends on specific JAR files that need to be downloaded and placed
 
 3. Place files in the monitored directories. The client will automatically process and send them to the server.
 
+## Logging Configuration
+
+Both client and server use log4j for logging. The default configuration:
+- Logs INFO level and above messages
+- Outputs logs to both console and log files
+- Server logs are written to `server/logs/filehandler.log`
+- Client logs are written to `client/logs/filehandler.log`
+- Log files are rotated when they reach 10MB with a maximum of 10 backup files
+
+You can customize logging behavior by editing the respective log4j.properties files.
+
 ## Testing
 
 1. Start both the server and client.
@@ -139,6 +164,26 @@ This project depends on specific JAR files that need to be downloaded and placed
 3. Place a test file in one of the monitored directories.
 4. Check the logs and terminal output to see the progress.
 5. Verify that the file is transferred to the server's storage location.
+
+## Troubleshooting
+
+### Log4j Configuration Issues
+If you see log4j warnings like "No appenders could be found for logger", make sure:
+- The log4j.properties file exists in the config directory
+- The logs directory exists
+- The startup script correctly references the log4j configuration file
+
+### File Path Issues
+The server application expects to find configuration files like client_keys.properties and client_paths.properties in the config directory relative to the working directory. If you encounter FileNotFoundException errors:
+- Ensure all configuration files exist in the correct locations
+- Make sure the startup scripts set the correct working directory
+- Use absolute paths in properties files for external directories
+
+### ClassNotFoundException
+If you get "ClassNotFoundException" errors:
+- Check that the JAR files exist in the lib directory
+- Verify the classpath in the startup scripts is correct
+- Make sure the compilation process completed successfully
 
 ## License
 

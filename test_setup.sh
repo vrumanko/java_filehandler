@@ -24,6 +24,9 @@ java -version
 # Create lib directories
 mkdir -p client/lib server/lib
 
+# Create config directories
+mkdir -p client/config server/config
+
 # Download required JAR files if missing
 download_jar() {
   local dir="$1"
@@ -75,6 +78,95 @@ for dir in "client" "server"; do
 done
 
 echo "All required JAR files are present."
+
+# Create sample config files if they don't exist
+echo "Creating sample configuration files if needed..."
+
+# Client config files
+if [ ! -f "client/config/client.properties" ]; then
+  echo "Creating client/config/client.properties..."
+  cat > client/config/client.properties << EOF
+# Client configuration properties
+client.label=client1
+source.directories=/tmp/filehandler/source1,/tmp/filehandler/source2
+server.host=localhost
+server.port=9000
+encryption.key=abcdefghijklmnop
+EOF
+fi
+
+if [ ! -f "client/config/log4j.properties" ]; then
+  echo "Creating client/config/log4j.properties..."
+  cat > client/config/log4j.properties << EOF
+# Root logger option
+log4j.rootLogger=INFO, stdout, file
+
+# Direct log messages to stdout
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.Target=System.out
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+
+# Direct log messages to a log file
+log4j.appender.file=org.apache.log4j.RollingFileAppender
+log4j.appender.file.File=../logs/filehandler.log
+log4j.appender.file.MaxFileSize=10MB
+log4j.appender.file.MaxBackupIndex=10
+log4j.appender.file.layout=org.apache.log4j.PatternLayout
+log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+EOF
+fi
+
+# Server config files
+if [ ! -f "server/config/server.properties" ]; then
+  echo "Creating server/config/server.properties..."
+  cat > server/config/server.properties << EOF
+# Server configuration properties
+server.port=9000
+client.keys.file=config/client_keys.properties
+client.paths.file=config/client_paths.properties
+EOF
+fi
+
+if [ ! -f "server/config/client_keys.properties" ]; then
+  echo "Creating server/config/client_keys.properties..."
+  cat > server/config/client_keys.properties << EOF
+# Client encryption keys
+# Format: client_label=encryption_key
+client1=abcdefghijklmnop
+EOF
+fi
+
+if [ ! -f "server/config/client_paths.properties" ]; then
+  echo "Creating server/config/client_paths.properties..."
+  cat > server/config/client_paths.properties << EOF
+# Client storage paths
+# Format: client_label=storage_path
+client1=/tmp/filehandler/received
+EOF
+fi
+
+if [ ! -f "server/config/log4j.properties" ]; then
+  echo "Creating server/config/log4j.properties..."
+  cat > server/config/log4j.properties << EOF
+# Root logger option
+log4j.rootLogger=INFO, stdout, file
+
+# Direct log messages to stdout
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.Target=System.out
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+
+# Direct log messages to a log file
+log4j.appender.file=org.apache.log4j.RollingFileAppender
+log4j.appender.file.File=../logs/filehandler.log
+log4j.appender.file.MaxFileSize=10MB
+log4j.appender.file.MaxBackupIndex=10
+log4j.appender.file.layout=org.apache.log4j.PatternLayout
+log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+EOF
+fi
 
 # Verify encryption key length in config files
 echo "Checking encryption key length..."
