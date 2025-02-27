@@ -45,77 +45,20 @@ java_filehandler/
   - log4j-1.2.17.jar
   - commons-io-2.11.0.jar
 
-## Obtaining Required JAR Files
-
-This project depends on specific JAR files that need to be downloaded and placed in the appropriate directories:
-
-### Log4j 1.2.17
-
-1. Download log4j-1.2.17.jar from the Apache Archive:
-   - Direct link: https://archive.apache.org/dist/logging/log4j/1.2.17/log4j-1.2.17.jar
-   - Or visit: https://archive.apache.org/dist/logging/log4j/1.2.17/
-
-2. Verify the file integrity (optional):
-   - The SHA1 checksum should be: `5af35056b4d257e4b64b9e8069c0746e8b08629f`
-
-### Commons IO 2.11.0
-
-1. Download commons-io-2.11.0.jar from Apache Commons:
-   - Direct link: https://repo1.maven.org/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar
-   - Or visit: https://commons.apache.org/proper/commons-io/download_io.cgi
-
-2. Verify the file integrity (optional):
-   - The SHA1 checksum should be: `a2503f302b11ebde7ebc3df41daebe0e4eea3689`
-
 ### Installation Steps
 
-1. Create the lib directories if they don't exist:
+1. Clone repository:
    ```
-   mkdir -p client/lib server/lib
+   git clone git@github.com:vrumanko/java_filehandler.git
    ```
 
 2. Copy the downloaded JAR files to both client and server lib directories:
    ```
-   cp /path/to/log4j-1.2.17.jar client/lib/
-   cp /path/to/log4j-1.2.17.jar server/lib/
-   cp /path/to/commons-io-2.11.0.jar client/lib/
-   cp /path/to/commons-io-2.11.0.jar server/lib/
+   cd java_filehandler
+   ./test_setup.sh
    ```
+It will download required libraries, create directory structure and create demo configuration for one machine.
 
-3. Verify the installation:
-   ```
-   ls -la client/lib/
-   ls -la server/lib/
-   ```
-   
-   You should see both JAR files in each directory.
-
-## Setup
-
-1. Download and place the required JAR files in the `client/lib/` and `server/lib/` directories.
-
-2. Configure client:
-   - Edit `client/config/client.properties` to set:
-     - Client label
-     - Source directories to monitor
-     - Server IP and port
-     - Encryption key
-     - Polling interval (in seconds)
-   - Edit `client/config/log4j.properties` if you need to customize logging behavior
-
-3. Configure server:
-   - Edit `server/config/server.properties` to set:
-     - Server port
-     - Client key and path configuration files
-   - Edit `server/config/client_keys.properties` to define encryption keys for each client
-   - Edit `server/config/client_paths.properties` to define storage paths for each client
-   - Edit `server/config/log4j.properties` if you need to customize logging behavior
-
-4. Create log directories:
-   ```
-   mkdir -p client/logs
-   mkdir -p server/logs
-   ```
 
 ## Compilation
 
@@ -130,7 +73,6 @@ This project depends on specific JAR files that need to be downloaded and placed
    cd server/script
    ./compile.sh
    ```
-
 ## Usage
 
 1. Start the server:
@@ -208,8 +150,8 @@ The server uses multiple configuration files:
 Both client and server use log4j for logging. The default configuration:
 - Logs INFO level and above messages
 - Outputs logs to both console and log files
-- Server logs are written to `server/logs/filehandler.log`
-- Client logs are written to `client/logs/filehandler.log`
+- Server logs are written to `server/logs/server_filehandler.log`
+- Client logs are written to `client/logs/client_filehandler.log`
 - Log files are rotated when they reach 10MB with a maximum of 10 backup files
 
 You can customize logging behavior by editing the respective log4j.properties files.
@@ -248,6 +190,28 @@ If the client cannot connect to the server:
 - Check that the server IP and port in client.properties are correct
 - Ensure there are no firewall rules blocking the connection
 - Verify network connectivity between client and server machines
+
+## Obtaining Required JAR Files
+
+This project depends on specific JAR files that need to be downloaded and placed in the appropriate directories:
+
+### Log4j 1.2.17
+
+1. Download log4j-1.2.17.jar from the Apache Archive:
+   - Direct link: https://archive.apache.org/dist/logging/log4j/1.2.17/log4j-1.2.17.jar
+   - Or visit: https://archive.apache.org/dist/logging/log4j/1.2.17/
+
+2. Verify the file integrity (optional):
+   - The SHA1 checksum should be: `5af35056b4d257e4b64b9e8069c0746e8b08629f`
+
+### Commons IO 2.11.0
+
+1. Download commons-io-2.11.0.jar from Apache Commons:
+   - Direct link: https://repo1.maven.org/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar
+   - Or visit: https://commons.apache.org/proper/commons-io/download_io.cgi
+
+2. Verify the file integrity (optional):
+   - The SHA1 checksum should be: `a2503f302b11ebde7ebc3df41daebe0e4eea3689`
 
 ## License
 
