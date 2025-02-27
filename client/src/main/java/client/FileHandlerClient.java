@@ -141,9 +141,12 @@ public class FileHandlerClient {
             encryptedFile.delete();
             
             if (sent) {
+                
+                // File sent: test3.txt (Duration: 0.016 seconds)
+                logger.info("File sent: " + fileName + " (Hash: " + fileHash + ")");
+                logger.info("File sent: " + fileName + " (Size: " + filePath.toFile().length() + " bytes)");
                 // Delete original file after successful transfer
                 Files.delete(filePath);
-                logger.info("File processed and sent successfully: " + fileName);
               
             }
         } catch (Exception e) {
