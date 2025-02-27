@@ -1,3 +1,13 @@
+/**
+* ## License
+* This project is licensed under the GPLv3 License. 
+*
+* ## Support This Project  
+* If this code helps you, consider sending a small crypto donation:  
+* - **SOL**: `DL5sEEG6z666vyety2FdDZtTF1pMtMAnjKXSdZTYg34K` 
+* - **BNB**: `0xC08f5CC86610e400bb3c12Fe8a085514F7e786E0` 
+*/
+
 package server;
 
 import java.io.*;

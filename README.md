@@ -100,6 +100,7 @@ This project depends on specific JAR files that need to be downloaded and placed
      - Source directories to monitor
      - Server IP and port
      - Encryption key
+     - Polling interval (in seconds)
    - Edit `client/config/log4j.properties` if you need to customize logging behavior
 
 3. Configure server:
@@ -146,6 +147,62 @@ This project depends on specific JAR files that need to be downloaded and placed
 
 3. Place files in the monitored directories. The client will automatically process and send them to the server.
 
+## Client Configuration Details
+
+The client application is configured through the `client.properties` file with the following parameters:
+
+- `client.label`: A unique identifier for the client (required by the server)
+- `source.directories`: Comma-separated list of directories to monitor for files
+- `server.host`: IP address or hostname of the server
+- `server.port`: Port number the server is listening on
+- `encryption.key`: Secret key used for AES encryption
+- `polling.interval.seconds`: Time between directory scans (defaults to 10 seconds if not specified)
+
+Example client.properties:
+```
+client.label=client1
+source.directories=/path/to/watch1,/path/to/watch2
+server.host=192.168.1.100
+server.port=9000
+encryption.key=your-secret-key-here
+polling.interval.seconds=30
+```
+
+## Server Configuration Details
+
+The server uses multiple configuration files:
+
+1. `server.properties`:
+   - `server.port`: Port to listen on for client connections
+   - `client.keys.file`: Path to the client keys configuration file
+   - `client.paths.file`: Path to the client paths configuration file
+
+2. `client_keys.properties`:
+   - Maps client labels to their encryption keys
+   - Format: `client_label=encryption_key`
+
+3. `client_paths.properties`:
+   - Maps client labels to their storage directories
+   - Format: `client_label=/path/to/storage/directory`
+
+## File Processing Workflow
+
+1. The client scans configured directories at regular intervals
+2. When a new file is found:
+   - A SHA-256 hash is calculated for integrity verification
+   - The file is compressed using GZIP
+   - The compressed file is encrypted using AES
+   - The encrypted file is sent to the server along with metadata
+   - Upon successful transfer, the original file is deleted
+
+3. The server:
+   - Receives the encrypted file and metadata
+   - Identifies the client and retrieves its encryption key
+   - Decrypts and decompresses the file
+   - Verifies the file integrity using the provided hash
+   - Stores the file in the client's designated directory
+   - Sends a success confirmation to the client
+
 ## Logging Configuration
 
 Both client and server use log4j for logging. The default configuration:
@@ -185,6 +242,18 @@ If you get "ClassNotFoundException" errors:
 - Verify the classpath in the startup scripts is correct
 - Make sure the compilation process completed successfully
 
+### Connection Issues
+If the client cannot connect to the server:
+- Verify the server is running
+- Check that the server IP and port in client.properties are correct
+- Ensure there are no firewall rules blocking the connection
+- Verify network connectivity between client and server machines
+
 ## License
 
-This project is licensed under the MIT License. 
+This project is licensed under the GPLv3 License. 
+
+## Support This Project  
+If this code helps you, consider sending a small crypto donation:  
+- **SOL**: `DL5sEEG6z666vyety2FdDZtTF1pMtMAnjKXSdZTYg34K` 
+- **BNB**: `0xC08f5CC86610e400bb3c12Fe8a085514F7e786E0`

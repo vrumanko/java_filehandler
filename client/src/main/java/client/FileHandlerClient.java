@@ -1,3 +1,13 @@
+/**
+* ## License
+* This project is licensed under the GPLv3 License. 
+*
+* ## Support This Project  
+* If this code helps you, consider sending a small crypto donation:  
+* - **SOL**: `DL5sEEG6z666vyety2FdDZtTF1pMtMAnjKXSdZTYg34K` 
+* - **BNB**: `0xC08f5CC86610e400bb3c12Fe8a085514F7e786E0` 
+*/
+
 package client;
 
 import java.io.*;
@@ -56,14 +66,11 @@ public class FileHandlerClient {
             String pollingIntervalStr = config.getProperty("polling.interval.seconds");
             pollingIntervalSeconds = (pollingIntervalStr != null) ? 
                                      Integer.parseInt(pollingIntervalStr) : 10;
-            
-            logger.info("FileHandlerClient initialized with label: " + clientLabel);
 
             // print environment info
             printEnvironmentInfo();
         } catch (IOException e) {
             logger.error("Error loading configuration: " + e.getMessage(), e);
-            System.err.println("Error loading configuration: " + e.getMessage());
             System.exit(1);
         }
     }
@@ -300,15 +307,6 @@ public class FileHandlerClient {
      * Useful for debugging and audit purposes
      */
     private void printEnvironmentInfo() {
-        try {
-            
-            // Get and log the server's IP address for connection information
-            String clientIP = java.net.InetAddress.getLocalHost().getHostAddress();
-            logger.info("Client is running on IP: " + clientIP);
-
-        } catch (IOException e) {
-            logger.error("Error starting client: " + e.getMessage(), e);
-            }
         String maskedKey = maskEncryptionKey(encryptionKey);
         logger.info("=========================================");
         logger.info("=== Client Java_Filehandler Started =====");
