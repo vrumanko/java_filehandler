@@ -93,6 +93,7 @@ source.directories=/tmp/filehandler/source1,/tmp/filehandler/source2
 server.host=localhost
 server.port=9000
 encryption.key=ThisIsASecretKey1234567890123456
+polling.interval.seconds=3
 EOF
 fi
 
@@ -110,7 +111,7 @@ log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1
 
 # Direct log messages to a log file
 log4j.appender.file=org.apache.log4j.RollingFileAppender
-log4j.appender.file.File=../logs/filehandler.log
+log4j.appender.file.File=../client/logs/client_filehandler.log
 log4j.appender.file.MaxFileSize=10MB
 log4j.appender.file.MaxBackupIndex=10
 log4j.appender.file.layout=org.apache.log4j.PatternLayout

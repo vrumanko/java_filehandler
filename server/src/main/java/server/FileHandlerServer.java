@@ -406,13 +406,11 @@ public class FileHandlerServer {
     public static void main(String[] args) {
         // Validate command-line arguments
         if (args.length < 1) {
-            System.out.println("Usage: java FileHandlerServer <config-file-path>");
+            System.out.println("Error: Missing configuration directory path!");
+            System.out.println("Usage: java FileHandlerServer <config-directory-path>");
             System.exit(1);
         }
-        
-        // Path to log4j configuration (for logging setup)
-        String log4jConfPath = "../config/log4j.properties";
-        
+
         // Initialize server with config file
         String configPath = args[0];
         FileHandlerServer server = new FileHandlerServer(configPath);
