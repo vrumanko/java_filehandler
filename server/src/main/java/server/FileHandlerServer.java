@@ -185,15 +185,12 @@ public class FileHandlerServer {
             
             // Read original file name (will be preserved when storing)
             String originalFileName = dis.readUTF();
-            logger.info("Original file name: " + originalFileName);
-            
+           
             // Read file hash (for integrity verification)
             String fileHash = dis.readUTF();
-            logger.info("File hash: " + fileHash);
             
             // Read file size (for progress tracking and verification)
             long fileSize = dis.readLong();
-            logger.info("File size: " + fileSize + " bytes");
             
             logger.info("Receiving file: " + originalFileName + " from client: " + clientLabel);
             
@@ -261,11 +258,13 @@ public class FileHandlerServer {
             // Calculate processing duration for performance logging
             long endTime = System.currentTimeMillis();
             double duration = (endTime - startTime) / 1000.0;
-            
+
+            long fileSizeReceived = uncompressedFile.length();
+
             // Log successful file transfer with performance metrics
             String logMessage = String.format(
                 "File transfer completed: %s, Client: %s, Size: %d bytes, Hash: %s, Duration: %.2f seconds",
-                originalFileName, clientLabel, fileSize, fileHash, duration
+                originalFileName, clientLabel, fileSizeReceived, fileHash, duration
             );
             logger.info(logMessage);
             
