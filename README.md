@@ -2,6 +2,8 @@
 
 A client-server application for securely transferring files. The client watches specified directories for new files, processes them (hashing, compressing, encrypting), and sends them to the server. The server decrypts, uncompresses, and stores the files in specified locations based on the client's identity.
 
+https://github.com/user-attachments/assets/2213d0ae-9706-440b-adff-c32108fd18a4
+
 ## Features
 
 - File monitoring on client side
