@@ -143,6 +143,7 @@ The server uses multiple configuration files:
    - Decrypts and decompresses the file
    - Verifies the file integrity using the provided hash
    - Stores the file in the client's designated directory
+   - If same file already exists in target directory, server raises error for that file and do not overwrite it
    - Sends a success confirmation to the client
 
 ## Logging Configuration
